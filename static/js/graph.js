@@ -17,8 +17,10 @@
      });
      console.log(data);
      show_lifetime_scores_by_character(ndx);
+     show_average_lifetime_score_per_character(ndx);
      show_participation_by_country(ndx);
      show_lifetime_rank_to_actual_scores_correlation(ndx);
+     show_lifetime_scores_by_team(ndx);
      dc.renderAll();
  }
 
@@ -26,7 +28,7 @@
      var character_dim = ndx.dimension(dc.pluck("Character"));
      var total_lifetime_score = character_dim.group().reduceSum(dc.pluck('Lifetime Score'));
 
-     dc.barChart("#total_lifetime_score_by_character")
+     dc.barChart("#total-lifetime-score-by-character")
          .width(1000)
          .height(300)
          .margins({ top: 10, right: 50, bottom: 30, left: 50 })
@@ -41,6 +43,54 @@
          .yAxis().ticks(4);
 
  }
+function show_average_lifetime_score_per_character(ndx) {
+    var dim = ndx.dimension(dc.pluck('Character'));
+
+    function add_item(p, v) {
+        p.count++;
+        p.total += v["Lifetime Score"];
+        p.average = p.total / p.count;
+        return p;
+    }
+
+    function remove_item(p, v) {
+        p.count--;
+        if (p.count == 0) {
+            p.total = 0;
+            p.average = 0;
+        }
+        else {
+            p.total -= v["Lifetime Score"];
+            p.average = p.total / p.count;
+        }
+        return p;
+    }
+
+    function initialise() {
+        return { count: 0, total: 0, average: 0 };
+    }
+
+    var averageLifetimeScoreByCharacter = dim.group().reduce(add_item, remove_item, initialise);
+
+    dc.barChart("#average-lifetime_score_by-character")
+        .width(1000)
+        .height(350)
+        .margins({ top: 100, right: 50, bottom: 30, left: 50 })
+        .dimension(dim)
+        .group(averageLifetimeScoreByCharacter)
+        .valueAccessor(function(d) {
+            return d.value.average.toFixed(2);
+        })
+        .transitionDuration(500)
+        .x(d3.scale.ordinal())
+        .xUnits(dc.units.ordinal)
+        .y(d3.scale.linear().domain([0, 150000]))
+        .xAxisLabel("Character")
+        .yAxisLabel("Average Lifetime Score")
+        .yAxis().ticks(4);
+
+
+}
 
  function show_participation_by_country(ndx) {
 
@@ -93,3 +143,24 @@
          .margins({ top: 10, right: 50, bottom: 75, left: 75 });
          
  }
+ 
+ function show_lifetime_scores_by_team(ndx) {
+     var team_dim = ndx.dimension(dc.pluck("Team"));
+     var total_lifetime_score = team_dim.group().reduceSum(dc.pluck('Lifetime Score'));
+
+     dc.barChart("#total-lifetime-score-by-team")
+         .width(1000)
+         .height(300)
+         .margins({ top: 10, right: 50, bottom: 30, left: 50 })
+         .dimension(team_dim)
+         .group(total_lifetime_score)
+         .transitionDuration(500)
+         .x(d3.scale.ordinal())
+         .xUnits(dc.units.ordinal)
+         .elasticY(true)
+         .xAxisLabel("Team")
+         .yAxisLabel("Total Lifetime Score")
+         .yAxis().ticks(4);
+ }
+ 
+ 
