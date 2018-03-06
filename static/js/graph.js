@@ -17,8 +17,6 @@
          } else {
              return d.Team;
          }
-
-
      });
      console.log(data);
      show_lifetime_scores_by_character(ndx);
@@ -32,13 +30,54 @@
      dc.renderAll();
  }
 
+
+ // Actual Score versus Lifetime Rank Scatter Plot
+ function show_lifetime_rank_to_actual_scores_correlation(ndx) {
+
+     var countryColors = d3.scale.ordinal()
+         .domain(["Japan", "United States", "Republic of Korea", "Taiwan", "United Kingdom", "France", "Singapore", "China", "Dominican Republic", "Belgium", "Norway"])
+         .range(["black", "blue", "red", "yellow", "orange", "grey", "green", "pink", "purple", "brown", "light-blue"])
+
+     var rDim = ndx.dimension(dc.pluck("Rank"));
+     var rankDim = ndx.dimension(function(d) {
+         return [d.Rank, d["Actual Score"], d.Name, d.Country, d.Character]
+     });
+
+     var actualScoresDim = rankDim.group();
+
+     var minRank = rDim.bottom(1)[0].Rank;
+     var maxRank = rDim.top(1)[0].Rank
+
+
+     dc.scatterPlot("#Lifetime-rank-to-actual-score")
+         .width(1000)
+         .height(400)
+         .x(d3.scale.linear().domain([minRank, maxRank]))
+         .brushOn(false)
+         .symbolSize(8)
+         .clipPadding(10)
+         .xAxisLabel("Lifetime Rank")
+         .yAxisLabel("Actual Score")
+         .title(function(d) {
+             return d.key[2] + " has an actual score of " + d.key[1] + " and ranks #" + d.key[0] +". Character: " + d.key[4];
+         })
+         .colorAccessor(function(d) {
+             return d.key[3];
+         })
+         .colors(countryColors)
+         .dimension(rankDim)
+         .group(actualScoresDim)
+         .margins({ top: 10, right: 50, bottom: 75, left: 75 });
+
+ }
+ // Barchart for Lifetime scores by Character
  function show_lifetime_scores_by_character(ndx) {
      var character_dim = ndx.dimension(dc.pluck("Character"));
      var total_lifetime_score = character_dim.group().reduceSum(dc.pluck('Lifetime Score'));
 
      dc.barChart("#total-lifetime-score-by-character")
          .width(1000)
-         .height(300)
+         .height(350)
          .margins({ top: 10, right: 50, bottom: 75, left: 75 })
          .dimension(character_dim)
          .group(total_lifetime_score)
@@ -50,10 +89,8 @@
          .yAxisLabel("Lifetime Score")
          .yAxis().ticks(4);
 
-
-
  }
-
+// Barchart for Average Lifetime scores by Character
  function show_average_lifetime_score_per_character(ndx) {
      var dim = ndx.dimension(dc.pluck('Character'));
 
@@ -95,83 +132,41 @@
          .transitionDuration(500)
          .x(d3.scale.ordinal())
          .xUnits(dc.units.ordinal)
-         .y(d3.scale.linear().domain([0, 150000]))
+         .y(d3.scale.linear().domain([0, 170000]))
          .xAxisLabel("Character")
          .yAxisLabel("Average Lifetime Score")
          .yAxis().ticks(4);
 
 
  }
-
+//Pie Chart Participation By Country
  function show_participation_by_country(ndx) {
 
      var country_dim = ndx.dimension(dc.pluck("Country"));
-     var total_lifetime_tournaments = country_dim.group().reduceSum(dc.pluck("Lifetime Tournaments"));
+     var total_lifetime_score = country_dim.group().reduceSum(dc.pluck("Lifetime Score"));
 
-     dc.pieChart("#participation-by-country")
-         .height(500)
+     dc.pieChart("#lifetime-score-by-country")
+         .height(450)
          .radius(200)
          .transitionDuration(1500)
          .dimension(country_dim)
-         .group(total_lifetime_tournaments);
+         .group(total_lifetime_score);
 
  }
-
-
-
- 
-
- function show_lifetime_rank_to_actual_scores_correlation(ndx) {
-
-     var countryColors = d3.scale.ordinal()
-         .domain(["Japan", "United States", "Republic of Korea", "Taiwan", "United Kingdom", "France", "Singapore", "China", "Dominican Republic", "Belgium", "Norway"])
-         .range(["black", "blue", "red", "yellow", "orange", "grey", "green", "pink", "purple", "brown", "light-blue"])
-
-     var rDim = ndx.dimension(dc.pluck("Rank"));
-     var rankDim = ndx.dimension(function(d) {
-         return [d.Rank, d["Actual Score"], d.Name, d.Country, d.Character]
-     });
-
-     var actualScoresDim = rankDim.group();
-
-     var minRank = rDim.bottom(1)[0].Rank;
-     var maxRank = rDim.top(1)[0].Rank
-
-
-     dc.scatterPlot("#Lifetime-rank-to-actual-score")
-         .width(800)
-         .height(400)
-         .x(d3.scale.linear().domain([minRank, maxRank]))
-         .brushOn(false)
-         .symbolSize(8)
-         .clipPadding(10)
-         .xAxisLabel("Lifetime Rank")
-         .yAxisLabel("Actual Score")
-         .title(function(d) {
-             return d.key[2] + " has an actual score of " + d.key[1] + " and ranks #" + d.key[0] +". Character: " + d.key[4];
-         })
-         .colorAccessor(function(d) {
-             return d.key[3];
-         })
-         .colors(countryColors)
-         .dimension(rankDim)
-         .group(actualScoresDim)
-         .margins({ top: 10, right: 50, bottom: 75, left: 75 });
-
- }
-
+//Pie Chart Lifetime Points By Team
  function show_lifetime_scores_by_team(ndx) {
      var team_dim = ndx.dimension(dc.pluck("Team"));
      var total_lifetime_score = team_dim.group().reduceSum(dc.pluck('Lifetime Score'));
 
      dc.pieChart("#total-lifetime-score-by-team")
-         .height(500)
+         .height(450)
          .radius(200)
          .transitionDuration(1500)
          .dimension(team_dim)
          .group(total_lifetime_score);
  }
 
+// Bar Charts By Gender
  function show_lifetime_scores_by_character_gender(ndx) {
      var gender_dim = ndx.dimension(dc.pluck("Character Gender"));
      var total_lifetime_score = gender_dim.group().reduceSum(dc.pluck('Lifetime Score'));
@@ -241,13 +236,3 @@ function show_average_lifetime_score_per_character_gender(ndx) {
          .yAxis().ticks(4);
 }
 
- /*.valueAccessor(function(d) {
-             return d.value.average.toFixed(2);
-         })
-         .transitionDuration(500)
-         .x(d3.scale.ordinal())
-         .xUnits(dc.units.ordinal)
-         .y(d3.scale.linear().domain([0, 150000]))
-         .xAxisLabel("Character")
-         .yAxisLabel("Average Lifetime Score")
-         .yAxis().ticks(4);*/
