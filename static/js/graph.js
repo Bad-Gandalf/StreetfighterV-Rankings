@@ -12,6 +12,11 @@
          d["Actual Score"] = +d["Actual Score"];
          d["Trending Score"] = +d["Trending Score"];
          d.Rank = +d.Rank;
+         if (d.Team ==""){
+             d.Team = "Independant"
+         } else {
+             return d.Team;
+         }
 
 
      });
@@ -21,6 +26,9 @@
      show_participation_by_country(ndx);
      show_lifetime_rank_to_actual_scores_correlation(ndx);
      show_lifetime_scores_by_team(ndx);
+     show_lifetime_scores_by_character_gender(ndx);
+     show_average_lifetime_score_per_character_gender(ndx);
+     
      dc.renderAll();
  }
 
@@ -31,7 +39,7 @@
      dc.barChart("#total-lifetime-score-by-character")
          .width(1000)
          .height(300)
-         .margins({ top: 10, right: 50, bottom: 30, left: 50 })
+         .margins({ top: 10, right: 50, bottom: 75, left: 75 })
          .dimension(character_dim)
          .group(total_lifetime_score)
          .transitionDuration(500)
@@ -42,55 +50,58 @@
          .yAxisLabel("Lifetime Score")
          .yAxis().ticks(4);
 
+
+
  }
-function show_average_lifetime_score_per_character(ndx) {
-    var dim = ndx.dimension(dc.pluck('Character'));
 
-    function add_item(p, v) {
-        p.count++;
-        p.total += v["Lifetime Score"];
-        p.average = p.total / p.count;
-        return p;
-    }
+ function show_average_lifetime_score_per_character(ndx) {
+     var dim = ndx.dimension(dc.pluck('Character'));
 
-    function remove_item(p, v) {
-        p.count--;
-        if (p.count == 0) {
-            p.total = 0;
-            p.average = 0;
-        }
-        else {
-            p.total -= v["Lifetime Score"];
-            p.average = p.total / p.count;
-        }
-        return p;
-    }
+     function add_item(p, v) {
+         p.count++;
+         p.total += v["Lifetime Score"];
+         p.average = p.total / p.count;
+         return p;
+     }
 
-    function initialise() {
-        return { count: 0, total: 0, average: 0 };
-    }
+     function remove_item(p, v) {
+         p.count--;
+         if (p.count == 0) {
+             p.total = 0;
+             p.average = 0;
+         }
+         else {
+             p.total -= v["Lifetime Score"];
+             p.average = p.total / p.count;
+         }
+         return p;
+     }
 
-    var averageLifetimeScoreByCharacter = dim.group().reduce(add_item, remove_item, initialise);
+     function initialise() {
+         return { count: 0, total: 0, average: 0 };
+     }
 
-    dc.barChart("#average-lifetime_score_by-character")
-        .width(1000)
-        .height(350)
-        .margins({ top: 100, right: 50, bottom: 30, left: 50 })
-        .dimension(dim)
-        .group(averageLifetimeScoreByCharacter)
-        .valueAccessor(function(d) {
-            return d.value.average.toFixed(2);
-        })
-        .transitionDuration(500)
-        .x(d3.scale.ordinal())
-        .xUnits(dc.units.ordinal)
-        .y(d3.scale.linear().domain([0, 150000]))
-        .xAxisLabel("Character")
-        .yAxisLabel("Average Lifetime Score")
-        .yAxis().ticks(4);
+     var averageLifetimeScoreByCharacter = dim.group().reduce(add_item, remove_item, initialise);
+
+     dc.barChart("#average-lifetime_score_by-character")
+         .width(1000)
+         .height(350)
+         .margins({ top: 10, right: 50, bottom: 75, left: 75 })
+         .dimension(dim)
+         .group(averageLifetimeScoreByCharacter)
+         .valueAccessor(function(d) {
+             return d.value.average.toFixed(2);
+         })
+         .transitionDuration(500)
+         .x(d3.scale.ordinal())
+         .xUnits(dc.units.ordinal)
+         .y(d3.scale.linear().domain([0, 150000]))
+         .xAxisLabel("Character")
+         .yAxisLabel("Average Lifetime Score")
+         .yAxis().ticks(4);
 
 
-}
+ }
 
  function show_participation_by_country(ndx) {
 
@@ -106,6 +117,10 @@ function show_average_lifetime_score_per_character(ndx) {
 
  }
 
+
+
+ 
+
  function show_lifetime_rank_to_actual_scores_correlation(ndx) {
 
      var countryColors = d3.scale.ordinal()
@@ -114,7 +129,7 @@ function show_average_lifetime_score_per_character(ndx) {
 
      var rDim = ndx.dimension(dc.pluck("Rank"));
      var rankDim = ndx.dimension(function(d) {
-         return [d.Rank, d["Actual Score"], d.Name, d.Country]
+         return [d.Rank, d["Actual Score"], d.Name, d.Country, d.Character]
      });
 
      var actualScoresDim = rankDim.group();
@@ -131,8 +146,9 @@ function show_average_lifetime_score_per_character(ndx) {
          .symbolSize(8)
          .clipPadding(10)
          .xAxisLabel("Lifetime Rank")
+         .yAxisLabel("Actual Score")
          .title(function(d) {
-             return d.key[2] + " has an actual score of " + d.key[1];
+             return d.key[2] + " has an actual score of " + d.key[1] + " and ranks #" + d.key[0] +". Character: " + d.key[4];
          })
          .colorAccessor(function(d) {
              return d.key[3];
@@ -141,26 +157,97 @@ function show_average_lifetime_score_per_character(ndx) {
          .dimension(rankDim)
          .group(actualScoresDim)
          .margins({ top: 10, right: 50, bottom: 75, left: 75 });
-         
+
  }
- 
+
  function show_lifetime_scores_by_team(ndx) {
      var team_dim = ndx.dimension(dc.pluck("Team"));
      var total_lifetime_score = team_dim.group().reduceSum(dc.pluck('Lifetime Score'));
 
-     dc.barChart("#total-lifetime-score-by-team")
-         .width(1000)
-         .height(300)
-         .margins({ top: 10, right: 50, bottom: 30, left: 50 })
+     dc.pieChart("#total-lifetime-score-by-team")
+         .height(500)
+         .radius(200)
+         .transitionDuration(1500)
          .dimension(team_dim)
+         .group(total_lifetime_score);
+ }
+
+ function show_lifetime_scores_by_character_gender(ndx) {
+     var gender_dim = ndx.dimension(dc.pluck("Character Gender"));
+     var total_lifetime_score = gender_dim.group().reduceSum(dc.pluck('Lifetime Score'));
+
+     dc.barChart("#total-lifetime-score-by-character-gender")
+         .width(400)
+         .height(350)
+         .margins({ top: 10, right: 50, bottom: 75, left: 75 })
+         .dimension(gender_dim)
          .group(total_lifetime_score)
+         .valueAccessor(function(d) {
+             return d.value;
+         })
          .transitionDuration(500)
          .x(d3.scale.ordinal())
          .xUnits(dc.units.ordinal)
          .elasticY(true)
-         .xAxisLabel("Team")
+         .xAxisLabel("Character Gender")
          .yAxisLabel("Total Lifetime Score")
          .yAxis().ticks(4);
  }
  
- 
+function show_average_lifetime_score_per_character_gender(ndx) {
+     var dim = ndx.dimension(dc.pluck('Character Gender'));
+
+     function add_item(p, v) {
+         p.count++;
+         p.total += v["Lifetime Score"];
+         p.average = p.total / p.count;
+         return p;
+     }
+
+     function remove_item(p, v) {
+         p.count--;
+         if (p.count == 0) {
+             p.total = 0;
+             p.average = 0;
+         }
+         else {
+             p.total -= v["Lifetime Score"];
+             p.average = p.total / p.count;
+         }
+         return p;
+     }
+
+     function initialise() {
+         return { count: 0, total: 0, average: 0 };
+     }
+
+     var averageLifetimeScoreByCharacter = dim.group().reduce(add_item, remove_item, initialise);
+
+     dc.barChart("#average-lifetime_score_by-character-gender")
+         .width(400)
+         .height(350)
+         .margins({ top: 10, right: 50, bottom: 75, left: 75 })
+         .dimension(dim)
+         .group(averageLifetimeScoreByCharacter)
+         .valueAccessor(function(d) {
+             return d.value.average.toFixed(2);
+         })
+         .transitionDuration(500)
+         .x(d3.scale.ordinal())
+         .xUnits(dc.units.ordinal)
+         .y(d3.scale.linear().domain([0, 120000]))
+         .xAxisLabel("Character Gender")
+         .yAxisLabel("Average Lifetime Score")
+         .yAxis().ticks(4);
+}
+
+ /*.valueAccessor(function(d) {
+             return d.value.average.toFixed(2);
+         })
+         .transitionDuration(500)
+         .x(d3.scale.ordinal())
+         .xUnits(dc.units.ordinal)
+         .y(d3.scale.linear().domain([0, 150000]))
+         .xAxisLabel("Character")
+         .yAxisLabel("Average Lifetime Score")
+         .yAxis().ticks(4);*/
