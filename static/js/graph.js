@@ -4,7 +4,7 @@ const StreetFighterApi = function() {
   queue()
    .defer(d3.csv, "/data/StreetfighterVrankings.csv")
    .await(this.makeGraphs);
- }
+ };
 
  this.makeGraphs = function (error, data) {
   var ndx = crossfilter(data);
@@ -20,7 +20,7 @@ const StreetFighterApi = function() {
    //Data Cleansing i.e. No Team = Independant      
    d.Rank = +d.Rank;
    if (d.Team == "") {
-    d.Team = "Independant"
+    d.Team = "Independant";
    }
    else {
     return d.Team;
@@ -102,7 +102,7 @@ const StreetFighterApi = function() {
 
   dc.barChart("#total-lifetime-score-by-character")
    .width(1000)
-   .height(350)
+   .height(300)
    .margins({ top: 10, right: 50, bottom: 75, left: 75 })
    .dimension(character_dim)
    .group(total_lifetime_score)
@@ -147,7 +147,7 @@ const StreetFighterApi = function() {
 
   dc.barChart("#average-lifetime_score_by-character")
    .width(1000)
-   .height(350)
+   .height(300)
    .margins({ top: 10, right: 50, bottom: 75, left: 75 })
    .dimension(dim)
    .group(averageLifetimeScoreByCharacter)
@@ -161,11 +161,7 @@ const StreetFighterApi = function() {
    .xAxisLabel("Character")
    .yAxisLabel("Average Lifetime Score")
    .yAxis().ticks(4);
-
-
  }
-
-
 
  // Bar Charts By Gender
  this.show_lifetime_scores_by_character_gender = function(ndx) {
