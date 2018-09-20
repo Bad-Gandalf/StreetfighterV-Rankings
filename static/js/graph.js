@@ -1,5 +1,5 @@
-const StreetFighterApi = function() {
-
+var StreetFighterApi = function() {
+// Await loading of csv file with data and then begin to make the graphs
  this.init = function() {
   queue()
    .defer(d3.csv, "/data/StreetfighterVrankings.csv")
@@ -17,7 +17,7 @@ const StreetFighterApi = function() {
    d["Actual Score"] = +d["Actual Score"];
    d["Trending Score"] = +d["Trending Score"];
 
-   //Data Cleansing i.e. No Team = Independant      
+   //Data Cleansing i.e. Players with no team will be counted as "Independant"      
    d.Rank = +d.Rank;
    if (d.Team == "") {
     d.Team = "Independant";
@@ -28,28 +28,55 @@ const StreetFighterApi = function() {
   });
   console.log(data);
 
+ function add_item(p, v) {
+   // For each different character, count their occurences and total their 'Lifetime score'
+   // Then find its average lifetime score. Return an object with count, total and average values.
+   p.count++;
+   p.total += v["Lifetime Score"];
+   p.average = p.total / p.count;
+   return p;
+  }
+// Removes the fact thats been added
+  function remove_item(p, v) {
+   p.count--;
+   if (p.count == 0) {
+    p.total = 0;
+    p.average = 0;
+   }
+   else {
+    p.total -= v["Lifetime Score"];
+    p.average = p.total / p.count;
+   }
+   return p;
+  }
+// Sets the initial value.
+  function initialise() {
+   return { count: 0, total: 0, average: 0 };
+  }
+
+
  // Actual Score versus Lifetime Rank Scatter Plot
  this.show_lifetime_rank_to_actual_scores_correlation = function(ndx) {
-
+// Choosing the colours each country that is represented in the chart.
   var countryColors = d3.scale.ordinal()
    .domain(["Japan", "United States", "Republic of Korea", "Taiwan", "United Kingdom", "France", "Singapore", "China", "Dominican Republic", "Belgium", "Norway"])
-   .range(["black", "blue", "red", "yellow", "orange", "grey", "green", "pink", "purple", "brown", "light-blue"])
-
+   .range(["black", "blue", "red", "yellow", "orange", "grey", "green", "pink", "purple", "brown", "light-blue"]);
+// Use "Rank" as the X-axis and select other values to be associated with it.
   var rDim = ndx.dimension(dc.pluck("Rank"));
   var rankDim = ndx.dimension(function(d) {
-   return [d.Rank, d["Actual Score"], d.Name, d.Country, d.Character]
+   return [d.Rank, d["Actual Score"], d.Name, d.Country, d.Character];
   });
-
+// Group these details by the the rank/ individual
   var actualScoresDim = rankDim.group();
-
+// Find the top and bottom rank figures in order to help declare a range for the x-axis
   var minRank = rDim.bottom(1)[0].Rank;
-  var maxRank = rDim.top(1)[0].Rank
+  var maxRank = rDim.top(1)[0].Rank;
 
-
+// Plot a scatter graph
   dc.scatterPlot("#Lifetime-rank-to-actual-score")
-   .width(1000)
+   .width(1000) 
    .height(300)
-   .x(d3.scale.linear().domain([minRank, maxRank]))
+   .x(d3.scale.linear().domain([minRank, maxRank])) // x-axis scale depending upon min and max rank declared earlier
    .brushOn(false)
    .symbolSize(8)
    .clipPadding(10)
@@ -57,21 +84,22 @@ const StreetFighterApi = function() {
    .yAxisLabel("Actual Score")
    .title(function(d) {
     return d.key[2] + " has an actual score of " + d.key[1] + " and ranks #" + d.key[0] + ". Character: " + d.key[4];
-   })
+   }) //Returns a description when a data-point on the graph is hovered over by user. Includes name, actual score, ranking and character. 
    .colorAccessor(function(d) {
     return d.key[3];
-   })
-   .colors(countryColors)
-   .dimension(rankDim)
+   }) // Player's country is returned to help choose correct colour of mark. 
+   .colors(countryColors) // Colors used for countries are those declared earlier in countryColors
+   .dimension(rankDim) 
    .group(actualScoresDim)
    .margins({ top: 10, right: 10, bottom: 75, left: 70 });
 
- }
+ };
 
  //Pie Chart Participation By Country
  this.show_participation_by_country = function(ndx) {
-
+// use dc to pluck information regarding a particular country
   var country_dim = ndx.dimension(dc.pluck("Country"));
+  // group the information in order to give each country a "Total Lifetime Score" by totalling each lifetime score associated with it.
   var total_lifetime_score = country_dim.group().reduceSum(dc.pluck("Lifetime Score"));
 
   dc.pieChart("#lifetime-score-by-country")
@@ -81,23 +109,13 @@ const StreetFighterApi = function() {
    .dimension(country_dim)
    .group(total_lifetime_score);
 
- }
+ };
 
- /*/Pie Chart Lifetime Points By Team
- this.show_lifetime_scores_by_team = function (ndx) {
-     var team_dim = ndx.dimension(dc.pluck("Team"));
-     var total_lifetime_score = team_dim.group().reduceSum(dc.pluck('Lifetime Score'));
-
-     dc.pieChart("#total-lifetime-score-by-team")
-         .height(220)
-         .radius(100)
-         .transitionDuration(1500)
-         .dimension(team_dim)
-         .group(total_lifetime_score);
- }*/
  // Barchart for Lifetime scores by Character
  this.show_lifetime_scores_by_character = function(ndx) {
+  //Pluck all the different characters from the data, i.e. Guile, Chun Li etc
   var character_dim = ndx.dimension(dc.pluck("Character"));
+  //Total each character's lifetime score.
   var total_lifetime_score = character_dim.group().reduceSum(dc.pluck('Lifetime Score'));
 
   dc.barChart("#total-lifetime-score-by-character")
@@ -114,35 +132,14 @@ const StreetFighterApi = function() {
    .yAxisLabel("Lifetime Score")
    .yAxis().ticks(4);
 
- }
+ };
  // Barchart for Average Lifetime scores by Character
  this.show_average_lifetime_score_per_character = function(ndx) {
+  // Pluck all the different characters from the data, i.e. Guile, Chun Li etc
   var dim = ndx.dimension(dc.pluck('Character'));
-
-  function add_item(p, v) {
-   p.count++;
-   p.total += v["Lifetime Score"];
-   p.average = p.total / p.count;
-   return p;
-  }
-
-  function remove_item(p, v) {
-   p.count--;
-   if (p.count == 0) {
-    p.total = 0;
-    p.average = 0;
-   }
-   else {
-    p.total -= v["Lifetime Score"];
-    p.average = p.total / p.count;
-   }
-   return p;
-  }
-
-  function initialise() {
-   return { count: 0, total: 0, average: 0 };
-  }
-
+// Building custom reducers to get correct averages.
+  
+// Use custom reducers with reduce() method to group characters and find their averages.
   var averageLifetimeScoreByCharacter = dim.group().reduce(add_item, remove_item, initialise);
 
   dc.barChart("#average-lifetime_score_by-character")
@@ -151,6 +148,7 @@ const StreetFighterApi = function() {
    .margins({ top: 10, right: 50, bottom: 75, left: 75 })
    .dimension(dim)
    .group(averageLifetimeScoreByCharacter)
+   // Return average lifetime score for character when hovered over, to 2 d.p.
    .valueAccessor(function(d) {
     return d.value.average.toFixed(2);
    })
@@ -161,11 +159,13 @@ const StreetFighterApi = function() {
    .xAxisLabel("Character")
    .yAxisLabel("Average Lifetime Score")
    .yAxis().ticks(4);
- }
+ };
 
  // Bar Charts By Gender
  this.show_lifetime_scores_by_character_gender = function(ndx) {
+  // Pluck gender from data, i.e. M/F
   var gender_dim = ndx.dimension(dc.pluck("Character Gender"));
+  // Total Lifetime scores for M/F characters
   var total_lifetime_score = gender_dim.group().reduceSum(dc.pluck('Lifetime Score'));
 
   dc.barChart("#total-lifetime-score-by-character-gender")
@@ -184,34 +184,12 @@ const StreetFighterApi = function() {
    .xAxisLabel("Character Gender")
    .yAxisLabel("Total Lifetime Score")
    .yAxis().ticks(4);
- }
+ };
 
  this.show_average_lifetime_score_per_character_gender = function(ndx) {
   var dim = ndx.dimension(dc.pluck('Character Gender'));
 
-  function add_item(p, v) {
-   p.count++;
-   p.total += v["Lifetime Score"];
-   p.average = p.total / p.count;
-   return p;
-  }
-
-  function remove_item(p, v) {
-   p.count--;
-   if (p.count == 0) {
-    p.total = 0;
-    p.average = 0;
-   }
-   else {
-    p.total -= v["Lifetime Score"];
-    p.average = p.total / p.count;
-   }
-   return p;
-  }
-
-  function initialise() {
-   return { count: 0, total: 0, average: 0 };
-  }
+  
 
   var averageLifetimeScoreByCharacter = dim.group().reduce(add_item, remove_item, initialise);
 
@@ -231,19 +209,19 @@ const StreetFighterApi = function() {
    .xAxisLabel("Character Gender")
    .yAxisLabel("Average Lifetime Score")
    .yAxis().ticks(4);
- }
+ };
 
 
 this.show_lifetime_scores_by_character(ndx);
   this.show_average_lifetime_score_per_character(ndx);
   this.show_participation_by_country(ndx);
   this.show_lifetime_rank_to_actual_scores_correlation(ndx);
-  // this.show_lifetime_scores_by_team(ndx);
   this.show_lifetime_scores_by_character_gender(ndx);
   this.show_average_lifetime_score_per_character_gender(ndx);
 
   dc.renderAll();
 };
 };
-const P = new StreetFighterApi;
+
+P = new StreetFighterApi;
 P.init();
