@@ -27,7 +27,7 @@ Alot of users will struggle to make sense of these charts by just looking at the
 included descriptions of what is happening beside or below each of the charts.
 Even with descriptions attached to the charts this may not be enough. The user can click on "Start the Tour" and
 they will be guided around each chart by intro.js. To further explain the features the dashboard possesses,
-the tour will explain fow to use these features such as clicking on bar/slices to isolate a particular variable,
+the tour will explain how to use these features such as clicking on bar/slices to isolate a particular variable,
 as previously mentioned.
 
 
@@ -57,8 +57,7 @@ as previously mentioned.
     - I took the tour backwards, making sure I checked every button that could be pressed.
     - I printed to the console any data that had been parsed and compared it to the csv file.
     - During development I checked for any errors in the console and eventually resolved all.
-    - I considered developing Jasmine tests for the site however after some research it seemed a bit over the top, time-consuming  
-      and unnecessary for this simple site.
+    - I considered developing Jasmine tests for the site however after some research it seemed a bit over the top, time-consuming and unnecessary for this simple site.
     
 
 
