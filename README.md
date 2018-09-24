@@ -57,20 +57,24 @@ as previously mentioned.
     - I took the tour backwards, making sure I checked every button that could be pressed.
     - I printed to the console any data that had been parsed and compared it to the csv file.
     - During development I checked for any errors in the console and eventually resolved all.
+    - I considered developing Jasmine tests for the site however after some research it seemed a bit over the top, time-consuming  
+      and unnecessary for this simple site.
     
 
 
 ## The Future
 
+I could potentially find an api for the data and run it through that, it would keep it up to date automatically.
+If this were impossible I may use a webscraper to get the data whenever required.
+More likely i will just create a recent csv if I ever wished to show it to any Streetfighter fans. 
 
 ## Deployment
-
+I deployed the site to github pages, it can be found at "https://bad-gandalf.github.io/StreetfighterV-Rankings/". I only had one issue
+with the deployment and that was the csv file could not be found. It was a simple fix though, as I removed backslash in front of the
+address in graphs.js and it worked immediately. 
 
 
 ## Credits
+- Shoryuken.com 
+    - Provided the data from the Capcom Pro Tour from which I could make the dashboard. 
 
-### Content
-- 
-
-### Media
-- 
