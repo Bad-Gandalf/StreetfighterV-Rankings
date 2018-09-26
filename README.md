@@ -68,7 +68,7 @@ If this were impossible I may use a webscraper to get the data whenever required
 More likely i will just create a recent csv if I ever wished to show it to any Streetfighter fans. 
 
 ## Deployment
-I deployed the site to github pages, it can be found at "https://bad-gandalf.github.io/StreetfighterV-Rankings/". I only had one issue
+I deployed the site to github pages, it can be found at "https://bad-gandalf.github.io/milestone2-StreetfighterV-Rankings/". I only had one issue
 with the deployment and that was the csv file could not be found. It was a simple fix though, as I removed backslash in front of the
 address in graphs.js and it worked immediately. 
 
