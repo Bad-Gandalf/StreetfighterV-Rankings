@@ -2,7 +2,7 @@ const StreetFighterApi = function() {
  // Await loading of csv file with data and then begin to make the graphs
  this.init = function() {
   queue()
-   .defer(d3.csv, "/data/StreetfighterVrankings.csv")
+   .defer(d3.csv, "data/StreetfighterVrankings.csv")
    .await(this.makeGraphs);
  };
 
