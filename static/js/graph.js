@@ -2,7 +2,7 @@ const StreetFighterApi = function() {
  // Await loading of csv file with data and then begin to make the graphs
  this.init = function() {
   queue()
-   .defer(d3.csv, "data/StreetfighterVrankings.csv")
+   .defer(d3.csv, "/data/StreetfighterVrankings.csv")
    .await(this.makeGraphs);
  };
 
@@ -61,8 +61,11 @@ const StreetFighterApi = function() {
   this.show_lifetime_rank_to_actual_scores_correlation = function(ndx) {
    // Choosing the colours each country that is represented in the chart.
    var countryColors = d3.scale.ordinal()
-    .domain(["Japan", "United States", "Republic of Korea", "Taiwan", "United Kingdom", "France", "Singapore", "China", "Dominican Republic", "Belgium", "Norway"])
-    .range(["black", "blue", "red", "yellow", "orange", "grey", "green", "pink", "purple", "brown", "light-blue"]);
+    .domain(["Japan", "United States", "Republic of Korea", "Taiwan", 
+            "United Kingdom", "France", "Singapore", "China", 
+            "Dominican Republic", "Belgium", "Norway"])
+    .range(["black", "blue", "red", "yellow", "orange", "grey", 
+            "green", "pink", "purple", "brown", "light-blue"]);
    // Use "Rank" as the X-axis and select other values to be associated with it.
    var rDim = ndx.dimension(dc.pluck("Rank"));
    var rankDim = ndx.dimension(function(d) {
@@ -202,7 +205,7 @@ const StreetFighterApi = function() {
     // Return average lifetime score for gender when hovered over, to 2 d.p.
     .valueAccessor(function(d) {
      return d.value.average.toFixed(2);
-    }) 
+    })
     .transitionDuration(500)
     .x(d3.scale.ordinal())
     .xUnits(dc.units.ordinal)
@@ -225,7 +228,7 @@ const StreetFighterApi = function() {
  };
 };
 
-P = new StreetFighterApi;
+P = new StreetFighterApi();
 
 // Run Streetfighter Api 
 P.init();

@@ -1,3 +1,5 @@
+/* Styling for each div containing a chart that will be loaded by graph.js */
+
 .chart-wrapper {
     overflow: auto;
     position: relative;
@@ -9,7 +11,7 @@
     padding: 8px 10px 5px;
 }
 
-.chart-wrapper .chart-title {
+.chart-title {
     border-bottom: 1px solid #d7d7d7;
     color: #666;
     font-size: 20px;
@@ -21,11 +23,10 @@
 .chart-stage {
     padding-left: 20px;
     padding-top: 20px;
-
 }
 
+/* Styling for logo on navigation bar */
 .logo {
     height: 50px;
     width: 50px;
-
 }

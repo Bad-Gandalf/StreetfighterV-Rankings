@@ -33,7 +33,12 @@ as previously mentioned.
 
 ## Technolgies used:
 
-- HTML, CSS, Javascript 
+- HTML
+    - a standardized system for tagging text files to achieve font, colour, graphic, and hyperlink effects on World Wide Web pages.
+- CSS
+    - Cascading style sheets to style the content and layout of the site.
+- Javascript 
+    - I used javascript to create the graphs for the page based on the current data supplied.
 - [Bootstrap](https://getbootstrap.com/)
     - Used for its grid system to help in design going from mobile to larger displays.
 - [crossfilter](https://github.com/crossfilter/crossfilter)
@@ -68,7 +73,7 @@ If this were impossible I may use a webscraper to get the data whenever required
 More likely i will just create a recent csv if I ever wished to show it to any Streetfighter fans. 
 
 ## Deployment
-I deployed the site to github pages, it can be found at "https://bad-gandalf.github.io/milestone2-StreetfighterV-Rankings/". I only had one issue
+I deployed the site to github pages, it can be found [here](https://bad-gandalf.github.io/milestone2-StreetfighterV-Rankings/). I only had one issue
 with the deployment and that was the csv file could not be found. It was a simple fix though, as I removed backslash in front of the
 address in graphs.js and it worked immediately. 
 
